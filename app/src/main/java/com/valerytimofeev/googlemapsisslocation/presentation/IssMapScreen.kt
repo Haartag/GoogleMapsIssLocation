@@ -10,12 +10,15 @@ import com.google.maps.android.compose.GoogleMap
 
 
 @Composable
-fun MapSurface() {
+fun MapSurface(
+    viewModel: IssMapViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
+) {
     val scaffoldState = rememberScaffoldState()
 
     Scaffold(scaffoldState = scaffoldState) {
         GoogleMap(
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier.fillMaxSize(),
+            properties = viewModel.mapProperties
         ) {
 
         }
