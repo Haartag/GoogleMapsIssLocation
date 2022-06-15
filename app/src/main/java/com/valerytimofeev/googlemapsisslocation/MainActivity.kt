@@ -5,8 +5,9 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import com.valerytimofeev.googlemapsisslocation.presentation.MapSurface
 import com.valerytimofeev.googlemapsisslocation.ui.theme.GoogleMapsIssLocationTheme
+import dagger.hilt.android.AndroidEntryPoint
 
-
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
