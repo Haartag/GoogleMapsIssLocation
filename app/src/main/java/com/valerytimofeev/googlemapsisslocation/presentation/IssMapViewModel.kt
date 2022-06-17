@@ -38,7 +38,7 @@ class IssMapViewModel @Inject constructor(
     //make custom icon from resource
     fun getMarkerBitmap(context: Context): Bitmap {
         val markerVector =
-            ContextCompat.getDrawable(context, R.drawable.ic_launcher_foreground)!!
+            ContextCompat.getDrawable(context, R.drawable.ic_iss)!!
         markerVector.setBounds(0, 0, markerVector.intrinsicWidth, markerVector.intrinsicHeight)
         val markerBitmap = Bitmap.createBitmap(
             markerVector.intrinsicWidth,
