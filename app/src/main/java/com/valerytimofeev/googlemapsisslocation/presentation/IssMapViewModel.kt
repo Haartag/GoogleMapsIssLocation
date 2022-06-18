@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.util.Log
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
@@ -17,8 +18,11 @@ import com.valerytimofeev.googlemapsisslocation.R
 import com.valerytimofeev.googlemapsisslocation.data.remote.responses.IssLocationResponse
 import com.valerytimofeev.googlemapsisslocation.domain.repository.IssLocationRepository
 import com.valerytimofeev.googlemapsisslocation.utility.Constants
+import com.valerytimofeev.googlemapsisslocation.utility.Constants.TAG
 import com.valerytimofeev.googlemapsisslocation.utility.IssLocationResource
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -29,10 +33,19 @@ class IssMapViewModel @Inject constructor(
 
     val mapProperties =
         MapProperties(mapStyleOptions = MapStyleOptions(MapDecoration.MapStyle.json))
-    val loadingState = mutableStateOf(false)
+
+    val alignMap = mutableStateOf(true)
+
+    val isMapLoaded = mutableStateOf(false)
+
+    //From API
+    val isLoading = mutableStateOf(false)
+    val loadError = mutableStateOf("")
+    val currentIssLocation =
+        mutableStateOf<IssLocationResource<IssLocationResponse>>(IssLocationResource.Loading())
 
     init {
-        Log.d(Constants.TAG, "init")
+        startTrackIssLocation()
     }
 
     //make custom icon from resource
@@ -55,10 +68,38 @@ class IssMapViewModel @Inject constructor(
         return CameraPosition.fromLatLngZoom(position, 2f)
     }
 
-    //API test part
-    suspend fun loadIss(): IssLocationResource<IssLocationResponse> {
-        val a = repository.getCurrentIssLocation()
-        Log.d(Constants.TAG, "MapSurface: ${a.data?.message} -> ${a.data?.issPosition?.latitude}")
-        return a
+    //API job
+    var job: Job? = null
+
+    fun startTrackIssLocation() {
+        stopTrackIssLocation()
+        job = viewModelScope.launch {
+            while (true) {
+                isLoading.value = true
+                val response = loadLocationFromApi()
+                when (response) {
+                    is IssLocationResource.Success -> {
+                        loadError.value = ""
+                        isLoading.value = false
+                        currentIssLocation.value = response
+                    }
+                    is IssLocationResource.Error -> {
+                        loadError.value = response.message!!
+                        isLoading.value = false
+                        stopTrackIssLocation()
+                    }
+                }
+                delay(Constants.TIMER)
+            }
+        }
+    }
+
+    private fun stopTrackIssLocation() {
+        job?.cancel()
+        job = null
+    }
+
+    private suspend fun loadLocationFromApi(): IssLocationResource<IssLocationResponse> {
+        return repository.getCurrentIssLocation()
     }
 }

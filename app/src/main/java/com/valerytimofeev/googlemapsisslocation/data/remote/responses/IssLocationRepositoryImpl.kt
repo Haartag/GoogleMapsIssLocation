@@ -16,7 +16,7 @@ class IssLocationRepositoryImpl @Inject constructor(
         val response = try {
             api.getIssLocation()
         } catch (e: Exception) {
-            return IssLocationResource.Error(message = "Error: try to check your internet connection $e")
+            return IssLocationResource.Error(message = "try to check your internet connection \n\n $e")
         }
         return IssLocationResource.Success(response)
     }
